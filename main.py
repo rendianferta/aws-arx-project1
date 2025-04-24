@@ -2,6 +2,8 @@ from flask import Flask, render_template, request , flash, redirect, url_for, se
 from database import SQL
 import datetime
 
+sql = SQL()
+
 
 def dictify(data, table):
     if not data:
@@ -85,10 +87,10 @@ def rental_car(car_id):
             car_id = car_id
             user = session.get('user_id')
             sql.book(user, car_id, datetime.date.today(), datetime.date.today() + datetime.timedelta(days=7), selected_car["price"] * 7, "Waiting Approval")
-            flash(f"{selected_car["name"]} rental submission posted, waiting for approval")
+            flash(f"{selected_car['name']} rental submission posted, waiting for approval")
             return redirect(url_for("detail", car_id = car_id))
         else:
-            flash(f"{selected_car["name"]} is already rented")
+            flash(f"{selected_car['name']} is already rented")
             return redirect(url_for("detail", car_id = car_id))
     return "404 error"
 
@@ -134,13 +136,13 @@ def account():
 @app.route("/account/accept/<int:rental_id>", methods = ["POST"])
 def accept(rental_id):
     sql.update_status("Booking", rental_id, "status", "Approved")
-    flash(f"Succesfully approved rental request of {sql.select_id(rental_id, "Booking")[0][1]}")
+    flash(f"Succesfully approved rental request of {sql.select_id(rental_id, 'Booking')[0][1]}")
     return redirect(url_for("account" ))
 
-@app.route("/account/reject/<int:rental_id>'", methods = ["POST"])
+@app.route("/account/reject/<int:rental_id>", methods = ["POST"])
 def reject(rental_id):
     sql.update_status("Booking", rental_id, "status", "Rejected")
-    flash(f"Succesfully rejected rental request of {sql.select_id(rental_id, "Booking")[0][1]}")
+    flash(f"Succesfully rejected rental request of {sql.select_id(rental_id, 'Booking')[0][1]}")
     return redirect(url_for("account" ))
 
 @app.route("/logout")
@@ -188,7 +190,7 @@ def login():
         if account: 
             if password == account[0]["password"]:
                 session["user_id"] = account[0]["id"]
-                flash(f"Succesfully logged in as {account[0]["nama"]}", category="success")
+                flash(f"Succesfully logged in as {account[0]['nama']}", category="success")
                 return redirect(url_for("explore"))
             else:
                 flash("Incorrect password, try again.", category="error")
@@ -197,7 +199,6 @@ def login():
     return render_template("Login.html")
 
 if __name__ == "__main__":
-    sql = SQL()
     app.run()
     session["last_page"] = "HomePage" 
 
